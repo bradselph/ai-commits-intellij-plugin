@@ -7,6 +7,7 @@
 - Prompt variable `{previousCommitMessages}` for prompt customization that is replaced with commit messages from the
   previous commits.
 - Setting for a number of previous commit messages to include in the prompt in prompt settings.
+- Notification if Task Manager is null and prompt variables for the task cannot be resolved.
 
 ## [2.18.0] - 2026-02-06
 

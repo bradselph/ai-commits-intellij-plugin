@@ -58,15 +58,7 @@ object AICommitsUtils {
         content = replaceBranch(content, branch)
         content = replaceHint(content, hint)
         content = content.replace("{previousCommitMessages}", previousCommitMessages.joinToString("\n"))
-
-        // TODO @Blarc: If TaskManager is null, the prompt might be incorrect...
-        TaskManager.getManager(project)?.let {
-            val activeTask = it.activeTask
-            content = content.replace("{taskId}", activeTask.id)
-            content = content.replace("{taskSummary}", activeTask.summary)
-            content = content.replace("{taskDescription}", activeTask.description.orEmpty())
-            content = content.replace("{taskTimeSpent}", DateFormatUtil.formatTime(activeTask.totalTimeSpent))
-        }
+        content = replaceTask(content, project)
 
         return if (content.contains("{diff}")) {
             content.replace("{diff}", diff)
@@ -101,6 +93,23 @@ object AICommitsUtils {
             }
         }
         return promptContent.replace("{hint}", hint.orEmpty())
+    }
+
+    fun replaceTask(promptContent: String, project: Project): String {
+        var content = promptContent
+        val taskManager = TaskManager.getManager(project)
+
+        if (taskManager != null) {
+            val activeTask = taskManager.activeTask
+            content = content.replace("{taskId}", activeTask.id)
+            content = content.replace("{taskSummary}", activeTask.summary)
+            content = content.replace("{taskDescription}", activeTask.description.orEmpty())
+            content = content.replace("{taskTimeSpent}", DateFormatUtil.formatTime(activeTask.totalTimeSpent))
+        } else if (content.contains("{taskId}") || content.contains("{taskSummary}") || content.contains("{taskDescription}") || content.contains("{taskTimeSpent}")) {
+            sendNotification(Notification.taskManagerIsNull())
+        }
+
+        return content
     }
 
     suspend fun retrieveToken(title: String): OneTimeString? {
