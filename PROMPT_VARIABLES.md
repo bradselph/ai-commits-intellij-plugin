@@ -6,16 +6,17 @@ They are replaced with real values at commit-message generation time
 
 ## Available Variables
 
-| Variable | Resolves To | Notes |
-|---|---|---|
-| `{locale}` | The project's configured locale name in English (e.g. "English", "German", "French"). | Useful for telling the LLM which language to reply in. |
-| `{diff}` | The computed git diff of staged changes. | If you omit this variable from your prompt, the diff is automatically appended to the end. |
-| `{branch}` | The current VCS branch name (Git or SVN). | Falls back to `main` (with a notification) if the branch cannot be determined. |
-| `{hint}` | A free-text hint provided by the user in the commit dialog. | See **Hint Syntax** below for simple and conditional forms. |
-| `{taskId}` | The ID of the active IntelliJ task (e.g. a JIRA issue key). | Only replaced when IntelliJ's Task Manager is available. |
-| `{taskSummary}` | The summary / title of the active IntelliJ task. | Only replaced when IntelliJ's Task Manager is available. |
-| `{taskDescription}` | The full description of the active IntelliJ task. | Resolves to an empty string if the task has no description. Only replaced when IntelliJ's Task Manager is available. |
-| `{taskTimeSpent}` | Total time spent on the active task, formatted as `HH:mm`. | Only replaced when IntelliJ's Task Manager is available. |
+| Variable                   | Resolves To                                                                           | Notes                                                                                                                |
+|----------------------------|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `{locale}`                 | The project's configured locale name in English (e.g. "English", "German", "French"). | Useful for telling the LLM which language to reply in.                                                               |
+| `{diff}`                   | The computed git diff of staged changes.                                              | If you omit this variable from your prompt, the diff is automatically appended to the end.                           |
+| `{branch}`                 | The current VCS branch name (Git or SVN).                                             | Falls back to `main` (with a notification) if the branch cannot be determined.                                       |
+| `{hint}`                   | A free-text hint provided by the user in the commit dialog.                           | See **Hint Syntax** below for simple and conditional forms.                                                          |
+| `{previousCommitMessages}` | Previous commit messages each in new line.                                            | The number of previous commit messages is set in prompt settings. By default set to 5.                               |
+| `{taskId}`                 | The ID of the active IntelliJ task (e.g. a JIRA issue key).                           | Only replaced when IntelliJ's Task Manager is available.                                                             |
+| `{taskSummary}`            | The summary / title of the active IntelliJ task.                                      | Only replaced when IntelliJ's Task Manager is available.                                                             |
+| `{taskDescription}`        | The full description of the active IntelliJ task.                                     | Resolves to an empty string if the task has no description. Only replaced when IntelliJ's Task Manager is available. |
+| `{taskTimeSpent}`          | Total time spent on the active task, formatted as `HH:mm`.                            | Only replaced when IntelliJ's Task Manager is available.                                                             |
 
 ## Hint Syntax
 

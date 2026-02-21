@@ -4,5 +4,6 @@ data class Prompt(
         var name: String = "",
         var description: String = "",
         var content: String = "",
-        var canBeChanged: Boolean = true
+        var canBeChanged: Boolean = true,
+        var numberOfPreviousCommits: Int = 5
 )

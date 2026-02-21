@@ -4,8 +4,15 @@
 
 ### Added
 
-- Support for Codex CLI (thanks to @Algomorph)
+- Prompt variable `{previousCommitMessages}` for prompt customization that is replaced with commit messages from the
+  previous commits.
+- Setting for a number of previous commit messages to include in the prompt in prompt settings.
 
+## [2.18.0] - 2026-02-06
+
+### Added
+
+- Support for Codex CLI (thanks to @Algomorph)
 
 ## [2.17.0] - 2026-01-10
 
@@ -37,7 +44,8 @@
 
 ### Changed
 
-- Generate commit action triggered via shortcut no longer opens the dropdown but instead runs the commit generation with the currently selected LLM client (#370).
+- Generate commit action triggered via shortcut no longer opens the dropdown but instead runs the commit generation with
+  the currently selected LLM client (#370).
 
 ### Removed
 
@@ -70,7 +78,8 @@
 
 ### Added
 
-- Generate commit action button is now a split button with a dropdown from which the user can change the LLM client from the commit dialog.
+- Generate commit action button is now a split button with a dropdown from which the user can change the LLM client from
+  the commit dialog.
 - Sort LLM clients in settings dropdown.
 
 ## [2.11.1] - 2025-04-25
@@ -89,14 +98,16 @@
 
 ### Fixed
 
-- Common branch is not detected when most files are unassociated with branches, despite at least one file belonging to a branch.
+- Common branch is not detected when most files are unassociated with branches, despite at least one file belonging to a
+  branch.
 - Cannot generate commit message when updating a submodule.
 
 ## [2.10.0] - 2025-04-08
 
 ### Added
 
-- Variable `{taskTimeSpent}` in `HH:mm` format for prompt customization that is replaced with value from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
+- Variable `{taskTimeSpent}` in `HH:mm` format for prompt customization that is replaced with value from the
+  active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
 
 ## [2.9.1] - 2025-03-23
 
@@ -104,7 +115,8 @@
 
 - Common branch is not computed.
 - Align language handling with IDE settings (thanks to @Canario5).
-- Locale dropdown incorrectly displays the first alphabetical locale instead of the actual default (e.q. "English") (thanks to @Canario5).
+- Locale dropdown incorrectly displays the first alphabetical locale instead of the actual default (e.q. "English") (
+  thanks to @Canario5).
 
 ## [2.9.0] - 2024-12-01
 
@@ -142,7 +154,8 @@
 
 ### Fixed
 
-- Unable to submit request to Gemini Google because it has a topK value of 64 but the supported range is from 1 (inclusive) to 41 (exclusive).
+- Unable to submit request to Gemini Google because it has a topK value of 64 but the supported range is from 1 (
+  inclusive) to 41 (exclusive).
 
 ## [2.7.0] - 2024-11-01
 
@@ -212,7 +225,8 @@
 
 ### Added
 
-- Variables `{taskId}`, `{taskSummary}` and `{taskDescription}` for prompt customization that are replaced with values from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
+- Variables `{taskId}`, `{taskSummary}` and `{taskDescription}` for prompt customization that are replaced with values
+  from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
 - Option to configure LLM client configuration per project.
 
 ### Changed
@@ -436,7 +450,7 @@
 ### Added
 
 - Show notification when diff is empty.
-- 
+-
     - This allows to compute diff only from files and **lines** selected in the commit dialog.
 
 ## [0.2.0] - 2023-03-27
@@ -448,50 +462,99 @@
 - Create commit message only for selected files.
 
 [Unreleased]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.17.0...HEAD
+
+[2.18.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.17.0...v2.18.0
+
 [2.17.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.16.1...v2.17.0
+
 [2.16.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.16.0...v2.16.1
+
 [2.16.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.15.0...v2.16.0
+
 [2.15.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.14.1...v2.15.0
+
 [2.14.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.14.0...v2.14.1
+
 [2.14.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.13.0...v2.14.0
+
 [2.13.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.12.0...v2.13.0
+
 [2.12.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.11.1...v2.12.0
+
 [2.11.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.11.0...v2.11.1
+
 [2.11.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.10.1...v2.11.0
+
 [2.10.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.10.0...v2.10.1
+
 [2.10.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.9.1...v2.10.0
+
 [2.9.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.9.0...v2.9.1
+
 [2.9.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.8.0...v2.9.0
+
 [2.8.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.7.1...v2.8.0
+
 [2.7.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.7.0...v2.7.1
+
 [2.7.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.6.0...v2.7.0
+
 [2.6.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.5.0...v2.6.0
+
 [2.5.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.4.1...v2.5.0
+
 [2.4.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.4.0...v2.4.1
+
 [2.4.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.3.1...v2.4.0
+
 [2.3.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.3.0...v2.3.1
+
 [2.3.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.2.0...v2.3.0
+
 [2.2.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.1.1...v2.2.0
+
 [2.1.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.1.0...v2.1.1
+
 [2.1.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.0.0...v2.1.0
+
 [2.0.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.6.0...v2.0.0
+
 [1.6.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.5.1...v1.6.0
+
 [1.5.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.5.0...v1.5.1
+
 [1.5.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.4.0...v1.5.0
+
 [1.4.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.3.0...v1.4.0
+
 [1.3.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.2.1...v1.3.0
+
 [1.2.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.2.0...v1.2.1
+
 [1.2.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.1.0...v1.2.0
+
 [1.1.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v1.0.0...v1.1.0
+
 [1.0.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.9.0...v1.0.0
+
 [0.9.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.8.0...v0.9.0
+
 [0.8.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.7.0...v0.8.0
+
 [0.7.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.6.2...v0.7.0
+
 [0.6.2]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.6.1...v0.6.2
+
 [0.6.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.6.0...v0.6.1
+
 [0.6.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.5.1...v0.6.0
+
 [0.5.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.5.0...v0.5.1
+
 [0.5.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.4.0...v0.5.0
+
 [0.4.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.3.0...v0.4.0
+
 [0.3.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v0.2.0...v0.3.0
+
 [0.2.0]: https://github.com/Blarc/ai-commits-intellij-plugin/commits/v0.2.0
