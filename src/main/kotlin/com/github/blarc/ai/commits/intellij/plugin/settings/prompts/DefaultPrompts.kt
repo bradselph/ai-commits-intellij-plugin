@@ -12,6 +12,8 @@ enum class DefaultPrompts(val prompt: Prompt) {
                     "NOT be longer than 74 characters. The sent text will be the differences between files, where deleted lines " +
                     "are prefixed with a single minus sign and added lines are prefixed with a single plus sign.\n" +
                     "{Use this hint to improve the commit message: \$hint}\n" +
+                    "Previous commit messages:\n" +
+                    "{previousCommitMessages}\n" +
                     "{diff}",
             false
         )
@@ -28,6 +30,8 @@ enum class DefaultPrompts(val prompt: Prompt) {
                     "End commit title with issue number if you can get it from the branch name: " +
                     "{branch} in parenthesis.\n" +
                     "{Use this hint to improve the commit message: \$hint}\n" +
+                    "Previous commit messages:\n" +
+                    "{previousCommitMessages}\n" +
                     "{diff}",
             false
         )
@@ -43,6 +47,8 @@ enum class DefaultPrompts(val prompt: Prompt) {
             "Write a concise commit message from 'git diff --staged' output in the format " +
                     "`[EMOJI] [TYPE](file/topic): [description in {locale}]`. Use GitMoji emojis (e.g., ✨ → feat), " +
                     "present tense, active voice, max 120 characters per line, no code blocks.\n" +
+                    "Previous commit messages:\n" +
+                    "{previousCommitMessages}\n" +
                     "---\n" +
                     "{diff}",
             false

@@ -2,10 +2,20 @@
 
 ## [Unreleased]
 
+## [2.19.0] - 2026-02-22
+
+### Added
+
+- Prompt variable `{previousCommitMessages}` for prompt customization that is replaced with commit messages from the
+  previous commits.
+- Setting for a number of previous commit messages to include in the prompt in prompt settings.
+- Notification if Task Manager is null and prompt variables for the task cannot be resolved.
+
+## [2.18.0] - 2026-02-06
+
 ### Added
 
 - Support for Codex CLI (thanks to @Algomorph)
-
 
 ## [2.17.0] - 2026-01-10
 
@@ -37,7 +47,8 @@
 
 ### Changed
 
-- Generate commit action triggered via shortcut no longer opens the dropdown but instead runs the commit generation with the currently selected LLM client (#370).
+- Generate commit action triggered via shortcut no longer opens the dropdown but instead runs the commit generation with
+  the currently selected LLM client (#370).
 
 ### Removed
 
@@ -70,7 +81,8 @@
 
 ### Added
 
-- Generate commit action button is now a split button with a dropdown from which the user can change the LLM client from the commit dialog.
+- Generate commit action button is now a split button with a dropdown from which the user can change the LLM client from
+  the commit dialog.
 - Sort LLM clients in settings dropdown.
 
 ## [2.11.1] - 2025-04-25
@@ -89,14 +101,16 @@
 
 ### Fixed
 
-- Common branch is not detected when most files are unassociated with branches, despite at least one file belonging to a branch.
+- Common branch is not detected when most files are unassociated with branches, despite at least one file belonging to a
+  branch.
 - Cannot generate commit message when updating a submodule.
 
 ## [2.10.0] - 2025-04-08
 
 ### Added
 
-- Variable `{taskTimeSpent}` in `HH:mm` format for prompt customization that is replaced with value from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
+- Variable `{taskTimeSpent}` in `HH:mm` format for prompt customization that is replaced with value from the
+  active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
 
 ## [2.9.1] - 2025-03-23
 
@@ -104,7 +118,8 @@
 
 - Common branch is not computed.
 - Align language handling with IDE settings (thanks to @Canario5).
-- Locale dropdown incorrectly displays the first alphabetical locale instead of the actual default (e.q. "English") (thanks to @Canario5).
+- Locale dropdown incorrectly displays the first alphabetical locale instead of the actual default (e.q. "English") (
+  thanks to @Canario5).
 
 ## [2.9.0] - 2024-12-01
 
@@ -142,7 +157,8 @@
 
 ### Fixed
 
-- Unable to submit request to Gemini Google because it has a topK value of 64 but the supported range is from 1 (inclusive) to 41 (exclusive).
+- Unable to submit request to Gemini Google because it has a topK value of 64 but the supported range is from 1 (
+  inclusive) to 41 (exclusive).
 
 ## [2.7.0] - 2024-11-01
 
@@ -212,7 +228,8 @@
 
 ### Added
 
-- Variables `{taskId}`, `{taskSummary}` and `{taskDescription}` for prompt customization that are replaced with values from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
+- Variables `{taskId}`, `{taskSummary}` and `{taskDescription}` for prompt customization that are replaced with values
+  from the active [task](https://www.jetbrains.com/help/idea/managing-tasks-and-context.html#work-with-tasks).
 - Option to configure LLM client configuration per project.
 
 ### Changed
@@ -447,7 +464,9 @@
 - Settings for locale and OpenAI token.
 - Create commit message only for selected files.
 
-[Unreleased]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.17.0...HEAD
+[Unreleased]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.19.0...HEAD
+[2.19.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.18.0...v2.19.0
+[2.18.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.17.0...v2.18.0
 [2.17.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.16.1...v2.17.0
 [2.16.1]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.16.0...v2.16.1
 [2.16.0]: https://github.com/Blarc/ai-commits-intellij-plugin/compare/v2.15.0...v2.16.0

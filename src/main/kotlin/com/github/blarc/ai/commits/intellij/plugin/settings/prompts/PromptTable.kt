@@ -1,14 +1,12 @@
 package com.github.blarc.ai.commits.intellij.plugin.settings.prompts
 
 import ai.grazie.utils.applyIf
+import com.github.blarc.ai.commits.intellij.plugin.*
 import com.github.blarc.ai.commits.intellij.plugin.AICommitsBundle.message
-import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils
-import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils.computeDiff
-import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils.getCommonBranch
-import com.github.blarc.ai.commits.intellij.plugin.createColumn
-import com.github.blarc.ai.commits.intellij.plugin.notBlank
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.computeDiff
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.getCommonBranch
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.getPreviousCommitMessages
 import com.github.blarc.ai.commits.intellij.plugin.settings.AppSettings2
-import com.github.blarc.ai.commits.intellij.plugin.unique
 import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.EDT
@@ -16,13 +14,11 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.vcs.changes.Change
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
-import com.intellij.ui.dsl.builder.Align
-import com.intellij.ui.dsl.builder.bindText
-import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.builder.text
+import com.intellij.ui.dsl.builder.*
 import com.intellij.ui.table.TableView
 import com.intellij.util.ui.ListTableModel
 import kotlinx.coroutines.CoroutineScope
@@ -114,10 +110,12 @@ class PromptTable(private val cs: CoroutineScope) {
         val prompt = newPrompt ?: Prompt("")
         val promptNameTextField = JBTextField()
         val promptDescriptionTextField = JBTextField()
+        val promptNumberOfPreviousCommitsTextField = JBTextField()
         val promptHintTextField = JBTextField()
         val promptContentTextArea = JBTextArea()
         val promptPreviewTextArea = JBTextArea()
         var branch: String? = null
+        lateinit var changes: List<Change>
         lateinit var diff: String
         lateinit var project: Project
 
@@ -169,11 +167,19 @@ class PromptTable(private val cs: CoroutineScope) {
                     .bindText(prompt::description)
                     .validationOnApply { notBlank(it.text) }
             }
+            row(message("settings.prompt.numberOfPreviousCommits")) {
+                cell(promptNumberOfPreviousCommitsTextField)
+                    .bindIntText(prompt::numberOfPreviousCommits)
+                    .validationOnApply { notBlank(it.text) }
+                    .validationOnApply { isPositiveInt(it.text) }
+                    .onChanged { setPreview(promptContentTextArea.text, promptHintTextField.text, it.text.toIntOrNull() ?: 0) }
+                    .align(Align.FILL)
+            }
             row(message("settings.prompt.hint")) {
                 cell(promptHintTextField)
                     .align(Align.FILL)
                     .text("This is a hint.")
-                    .onChanged { setPreview(promptContentTextArea.text, it.text) }
+                    .onChanged { setPreview(promptContentTextArea.text, it.text, promptNumberOfPreviousCommitsTextField.text.toInt()) }
                     .comment(message("settings.prompt.hint.comment"))
             }
             row {
@@ -183,7 +189,7 @@ class PromptTable(private val cs: CoroutineScope) {
                 scrollCell(promptContentTextArea)
                     .bindText(prompt::content)
                     .validationOnApply { notBlank(it.text) }
-                    .onChanged { setPreview(it.text, promptHintTextField.text) }
+                    .onChanged { setPreview(it.text, promptHintTextField.text, promptNumberOfPreviousCommitsTextField.text.toInt()) }
                     .align(Align.FILL)
             }.resizableRow()
             row {
@@ -207,19 +213,20 @@ class PromptTable(private val cs: CoroutineScope) {
         }
 
         private fun getChangesAndSetPreview(project: Project) = cs.launch(Dispatchers.IO + ModalityState.stateForComponent(rootPane).asContextElement()) {
-            val changes = ChangeListManager.getInstance(project).allChanges.toList()
+            changes = ChangeListManager.getInstance(project).allChanges.toList()
             branch = getCommonBranch(changes, project)
             diff = computeDiff(changes, true, project)
-
-            withContext(Dispatchers.EDT) {
-                setPreview(prompt.content, promptHintTextField.text)
-            }
+            setPreview(prompt.content, promptHintTextField.text, prompt.numberOfPreviousCommits)
         }
 
-        private fun setPreview(promptContent: String, hint: String) {
-            val constructPrompt = AICommitsUtils.constructPrompt(promptContent, diff, branch, hint, project)
-            promptPreviewTextArea.text = constructPrompt.substring(0, constructPrompt.length.coerceAtMost(10000))
-            promptPreviewTextArea.caretPosition = max(0, promptPreviewTextArea.caretPosition - 10)
+        private fun setPreview(promptContent: String, hint: String, numberOfPreviousCommitMessages: Int) = cs.launch(Dispatchers.IO + ModalityState.stateForComponent(rootPane).asContextElement()) {
+            val previousCommitMessages = getPreviousCommitMessages(numberOfPreviousCommitMessages, changes, project)
+            val constructPrompt = AICommitsUtils.constructPrompt(promptContent, diff, branch, hint, previousCommitMessages, project)
+
+            withContext(Dispatchers.EDT) {
+                promptPreviewTextArea.text = constructPrompt.substring(0, constructPrompt.length.coerceAtMost(10000))
+                promptPreviewTextArea.caretPosition = max(0, promptPreviewTextArea.caretPosition - 10)
+            }
         }
 
     }

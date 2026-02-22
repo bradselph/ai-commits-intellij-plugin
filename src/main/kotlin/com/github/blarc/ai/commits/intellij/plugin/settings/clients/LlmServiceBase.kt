@@ -1,8 +1,10 @@
 package com.github.blarc.ai.commits.intellij.plugin.settings.clients
 
-import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils.computeDiff
 import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils.constructPrompt
-import com.github.blarc.ai.commits.intellij.plugin.AICommitsUtils.getCommonBranch
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.computeDiff
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.getCommonBranch
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.getLastCommitChanges
+import com.github.blarc.ai.commits.intellij.plugin.AICommitsVcsUtils.getPreviousCommitMessages
 import com.github.blarc.ai.commits.intellij.plugin.notifications.Notification
 import com.github.blarc.ai.commits.intellij.plugin.notifications.sendNotification
 import com.github.blarc.ai.commits.intellij.plugin.settings.ProjectSettings
@@ -52,24 +54,25 @@ abstract class LlmServiceBase<C : LlmClientConfiguration>(protected val coroutin
         }
 
         val branch = getCommonBranch(includedChanges, project)
+
+        val activePrompt = project.service<ProjectSettings>().activePrompt
+
+        val previousCommits = getPreviousCommitMessages(
+            activePrompt.numberOfPreviousCommits,
+            includedChanges,
+            project
+        )
+
         val prompt = constructPrompt(
-            project.service<ProjectSettings>().activePrompt.content,
-            diff, branch, commitWorkflowHandler.getCommitMessage(), project
+            activePrompt.content,
+            diff,
+            branch,
+            commitWorkflowHandler.getCommitMessage(),
+            previousCommits,
+            project
         )
 
         return Pair(diff, prompt)
-    }
-
-    protected suspend fun getLastCommitChanges(project: Project): List<Change> {
-        return withContext(Dispatchers.IO) {
-            GitRepositoryManager.getInstance(project).repositories.map { repo ->
-                GitHistoryUtils.history(project, repo.root, "--max-count=1")
-            }.filter { commits ->
-                commits.isNotEmpty()
-            }.map { commits ->
-                (commits.first() as GitCommit).changes
-            }.flatten()
-        }
     }
 
     abstract fun generateCommitMessage(

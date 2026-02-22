@@ -44,21 +44,21 @@ object AICommitsUtils {
         return false
     }
 
-    fun constructPrompt(promptContent: String, diff: String, branch: String?, hint: String?, project: Project): String {
+    fun constructPrompt(
+        promptContent: String,
+        diff: String,
+        branch: String?,
+        hint: String?,
+        previousCommitMessages: List<String>,
+        project: Project
+    ): String {
         var content = promptContent
         val locale = project.service<ProjectSettings>().locale
         content = content.replace("{locale}", locale.getDisplayLanguage(Locale.ENGLISH))
         content = replaceBranch(content, branch)
         content = replaceHint(content, hint)
-
-        // TODO @Blarc: If TaskManager is null, the prompt might be incorrect...
-        TaskManager.getManager(project)?.let {
-            val activeTask = it.activeTask
-            content = content.replace("{taskId}", activeTask.id)
-            content = content.replace("{taskSummary}", activeTask.summary)
-            content = content.replace("{taskDescription}", activeTask.description.orEmpty())
-            content = content.replace("{taskTimeSpent}", DateFormatUtil.formatTime(activeTask.totalTimeSpent))
-        }
+        content = content.replace("{previousCommitMessages}", previousCommitMessages.joinToString("\n"))
+        content = replaceTask(content, project)
 
         return if (content.contains("{diff}")) {
             content.replace("{diff}", diff)
@@ -95,94 +95,21 @@ object AICommitsUtils {
         return promptContent.replace("{hint}", hint.orEmpty())
     }
 
-    suspend fun getCommonBranch(changes: List<Change>, project: Project): String? {
-        return withContext(Dispatchers.IO) {
-            changes.mapNotNull {
-                it.virtualFile?.let { virtualFile ->
-                    VcsUtil.getVcsFor(project, virtualFile)?.let { vcs ->
-                        when {
-                            isSvnAvailable() && vcs is SvnVcs -> {
-                                SvnUtil.getUrl(vcs, VfsUtilCore.virtualToIoFile(virtualFile))?.let { url ->
-                                    extractSvnBranchName(url.toDecodedString())
-                                }
-                            }
+    fun replaceTask(promptContent: String, project: Project): String {
+        var content = promptContent
+        val taskManager = TaskManager.getManager(project)
 
-                            vcs is GitVcs -> {
-                                GitRepositoryManager.getInstance(project)
-                                    .getRepositoryForFile(it.virtualFile)
-                                    ?.currentBranchName
-                            }
-
-                            else -> {
-                                null
-                            }
-                        }
-                    }
-                }
-            }.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+        if (taskManager != null) {
+            val activeTask = taskManager.activeTask
+            content = content.replace("{taskId}", activeTask.id)
+            content = content.replace("{taskSummary}", activeTask.summary)
+            content = content.replace("{taskDescription}", activeTask.description.orEmpty())
+            content = content.replace("{taskTimeSpent}", DateFormatUtil.formatTime(activeTask.totalTimeSpent))
+        } else if (content.contains("{taskId}") || content.contains("{taskSummary}") || content.contains("{taskDescription}") || content.contains("{taskTimeSpent}")) {
+            sendNotification(Notification.taskManagerIsNull())
         }
-    }
 
-    fun computeDiff(
-        includedChanges: List<Change>,
-        reversePatch: Boolean,
-        project: Project
-    ): String {
-        // go through included changes, create a map of repository to changes and discard nulls
-        val changesByRepository = includedChanges
-            .filter {
-                it.filePath()?.path?.let { path ->
-                    !isPathExcluded(path, project)
-                } ?: false
-            }
-            .mapNotNull { change ->
-                change.filePath()?.let { filePath ->
-                    VcsUtil.getVcsRootFor(project, filePath)?.let { vcsRoot ->
-                        vcsRoot to change
-                    }
-                }
-            }
-            .filter { !it.second.isSubmoduleChange(project) }
-            .groupBy({ it.first }, { it.second })
-
-
-        // compute diff for each repository
-        return changesByRepository
-            .map { (vcsRoot, changes) ->
-                val filePatches = IdeaTextPatchBuilder.buildPatch(
-                    project,
-                    changes,
-                    vcsRoot.toNioPath(), reversePatch, true
-                )
-
-                val stringWriter = StringWriter()
-                stringWriter.write("Repository: ${vcsRoot.path}\n")
-                UnifiedDiffWriter.write(project, filePatches, stringWriter, "\n", null)
-                stringWriter.toString()
-            }
-            .joinToString("\n")
-    }
-
-    private fun extractSvnBranchName(url: String): String? {
-        val normalizedUrl = url.lowercase()
-
-        // Standard SVN layout: repository/trunk, repository/branches/name, repository/tags/name
-        return when {
-            normalizedUrl.contains("/branches/") -> {
-                val branchPart = url.substringAfter("/branches/")
-                val endIndex = branchPart.indexOf('/')
-                if (endIndex > 0) branchPart.substring(0, endIndex) else branchPart
-            }
-
-            normalizedUrl.contains("/tags/") -> {
-                val tagPart = url.substringAfter("/tags/")
-                val endIndex = tagPart.indexOf('/')
-                if (endIndex > 0) "tag: ${tagPart.substring(0, endIndex)}" else "tag: $tagPart"
-            }
-
-            normalizedUrl.contains("/trunk") -> "trunk"
-            else -> null // fallback: no branch concept available
-        }
+        return content
     }
 
     suspend fun retrieveToken(title: String): OneTimeString? {
@@ -204,18 +131,5 @@ object AICommitsUtils {
 
     fun getIDELocale(): Locale {
         return DynamicBundle.getLocale()
-    }
-
-    private fun isClassAvailable(className: String): Boolean {
-        return try {
-            Class.forName(className)
-            true
-        } catch (e: ClassNotFoundException) {
-            false
-        }
-    }
-
-    private fun isSvnAvailable(): Boolean {
-        return isClassAvailable("org.jetbrains.idea.svn.SvnVcs") && isClassAvailable("org.jetbrains.idea.svn.SvnUtil")
     }
 }

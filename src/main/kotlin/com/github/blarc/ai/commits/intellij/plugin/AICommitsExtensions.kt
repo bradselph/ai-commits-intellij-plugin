@@ -77,6 +77,20 @@ fun ValidationInfoBuilder.isInt(value: String): ValidationInfo? {
     }
 }
 
+fun ValidationInfoBuilder.isPositiveInt(value: String): ValidationInfo? {
+    if (value.isBlank()) {
+        return null
+    }
+
+    value.toIntOrNull().let {
+        return if (it != null && it > 0) {
+            null
+        } else {
+            error(message("validation.positiveInteger"))
+        }
+    }
+}
+
 fun ValidationInfoBuilder.isFloat(value: String): ValidationInfo? {
     if (value.isBlank()) {
         return null
@@ -147,4 +161,3 @@ fun Change.isSubmoduleChange(project: Project): Boolean {
         .map { it.url }
         .any { it == fileRepositoryUrl }
 }
-
