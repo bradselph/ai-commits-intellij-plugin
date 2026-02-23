@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Commit message generation fails when SVN is not installed.
+
 ## [2.19.0] - 2026-02-22
 
 ### Added
