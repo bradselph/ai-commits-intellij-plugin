@@ -24,22 +24,29 @@ object AICommitsVcsUtils {
 
     suspend fun getCommonBranch(changes: List<Change>, project: Project): String? {
         return withContext(Dispatchers.IO) {
-            val repoManager = GitRepositoryManager.getInstance(project)
-            val isSvn = isSvnAvailable()
+            changes.mapNotNull {
+                it.virtualFile?.let { virtualFile ->
+                    VcsUtil.getVcsFor(project, virtualFile)?.let { vcs ->
+                        when {
+                            isSvnAvailable() && vcs is SvnVcs -> {
+                                SvnUtil.getUrl(vcs, VfsUtilCore.virtualToIoFile(virtualFile))?.let { url ->
+                                    extractSvnBranchName(url.toDecodedString())
+                                }
+                            }
 
-            changes.asSequence()
-                .mapNotNull { changeVirtualFile(it) }
-                .mapNotNull { file ->
-                    when (val vcs = VcsUtil.getVcsFor(project, file)) {
-                        is SvnVcs -> if (isSvn) svnBranchName(vcs, file) else null
-                        is GitVcs -> repoManager.getRepositoryForFile(file)?.currentBranchName
-                        else -> null
+                            vcs is GitVcs -> {
+                                GitRepositoryManager.getInstance(project)
+                                    .getRepositoryForFile(it.virtualFile)
+                                    ?.currentBranchName
+                            }
+
+                            else -> {
+                                null
+                            }
+                        }
                     }
                 }
-                .groupingBy { it }
-                .eachCount()
-                .maxByOrNull { it.value }
-                ?.key
+            }.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
         }
     }
 
@@ -126,11 +133,6 @@ object AICommitsVcsUtils {
 
     private fun changeVirtualFile(change: Change): VirtualFile? =
         change.virtualFile ?: change.afterRevision?.file?.virtualFile ?: change.beforeRevision?.file?.virtualFile
-
-    private fun svnBranchName(vcs: SvnVcs, file: VirtualFile): String? {
-        val url = SvnUtil.getUrl(vcs, VfsUtilCore.virtualToIoFile(file)) ?: return null
-        return extractSvnBranchName(url.toDecodedString())
-    }
 
     private fun extractSvnBranchName(url: String): String? {
         val normalizedUrl = url.lowercase()
