@@ -92,21 +92,26 @@ class ClaudeCodeClientService(private val cs: CoroutineScope) : LlmCliClientServ
 
         try {
             val process = ProcessBuilder(command)
-                .redirectErrorStream(true)
                 .start()
 
             // Close stdin immediately to prevent CLI from waiting for input
             process.outputStream.close()
 
-            // Read output in a separate thread to prevent buffer deadlock
+            // Read stdout and stderr in separate threads to prevent buffer deadlock.
+            // Do NOT use redirectErrorStream — the CLI writes version/status info to stderr
+            // and the JSON response to stdout; mixing them breaks JSON parsing.
             val outputFuture = java.util.concurrent.CompletableFuture.supplyAsync {
                 process.inputStream.bufferedReader().readText()
+            }
+            val stderrFuture = java.util.concurrent.CompletableFuture.supplyAsync {
+                process.errorStream.bufferedReader().readText()
             }
 
             val completed = process.waitFor(client.timeout.toLong(), TimeUnit.SECONDS)
             if (!completed) {
                 process.destroyForcibly()
                 outputFuture.cancel(true)
+                stderrFuture.cancel(true)
                 return@withContext Result.failure(
                     IllegalStateException(message("claudeCode.timeout"))
                 )
@@ -121,9 +126,12 @@ class ClaudeCodeClientService(private val cs: CoroutineScope) : LlmCliClientServ
                 )
             }
 
+            val stderr = try { stderrFuture.get(5, TimeUnit.SECONDS) } catch (_: Exception) { "" }
+
             if (process.exitValue() != 0) {
+                val errorDetails = if (stderr.isNotBlank()) stderr else output
                 return@withContext Result.failure(
-                    IllegalStateException("CLI exited with code ${process.exitValue()}: $output")
+                    IllegalStateException("CLI exited with code ${process.exitValue()}: $errorDetails")
                 )
             }
 
